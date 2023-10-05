@@ -43,23 +43,43 @@ class UDPCANListener:
         self.sock.close()
 
     def displayReadableData(self, data_bytes_list, readable_data, addr):
-        CANMSGIdentifier = list(data_bytes_list)[:4]
-        CANMSGDlc = list(data_bytes_list)[4:5]
-        CANMSGData = list(data_bytes_list)[5:14]
+        canFrame = CANFRAME(data_bytes_list)
 
         # Print the received data in byte form
         if self.debug: print(f"Received readable data: {readable_data}")
         print(
-            f"Received data (Raw Bytes): Identifier: {CANMSGIdentifier} Data length: {CANMSGDlc} Data: {CANMSGData}  from {addr}")
+            f"Received data (Raw Bytes): Identifier: {canFrame.CANMSGIdentifier.identifier_list} Data length: {canFrame.CANMSGDlc} Data: {canFrame.CANMSGData}  from {addr}")
 
-        self.explainIdentifier(CANMSGIdentifier)
+        canFrame.explainIdentifier()
 
+        canFrame.printData()
+
+
+class CANFRAME:
+    def __init__(self, data_bytes_list):
+        self.CANMSGIdentifier = CANIDENTIFIER(list(data_bytes_list)[:4])
+        self.CANMSGDlc = list(data_bytes_list)[4:5]
+        self.CANMSGData = list(data_bytes_list)[5:14]
+
+    def printData(self):
         print("Data: ", end="")
-        for databyte in CANMSGData:
+        for databyte in self.CANMSGData:
             print(f"{hex(int(databyte, 16))} ", end="")
         print("\n")
 
-    def explainIdentifier(self, canIdentifier):
+    def explainIdentifier(self):
+        self.CANMSGIdentifier.explainIdentifier()
+
+class CANIDENTIFIER:
+    def __init__(self, identifier_list):
+        self.identifier_list = identifier_list
+        self.msgPrio1   = ""
+        self.msgPrio2   = ""
+        self.msgCmd     = ""
+        self.msgResp    = ""
+        self.msgHash    = ""
+
+    def explainIdentifier(self, self.identifier_list):
 
         completeIdentifierHEX = canIdentifier[0] + canIdentifier[1] + canIdentifier[2] + canIdentifier[3]
         # print(f'Complete CAN IDENTIFIER in HEX: {completeIdentifierHEX}')
@@ -82,8 +102,6 @@ class UDPCANListener:
                 binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
 
                 print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
-
-
 
 def main():
     udpCanListener = UDPCANListener(UDP_IP, UDP_PORT)
