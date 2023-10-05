@@ -1,4 +1,5 @@
 import binascii
+from CANSPEC import ENUMS
 
 class CANIDENTIFIER:
     def __init__(self, identifier_list):
@@ -33,3 +34,28 @@ class CANIDENTIFIER:
                 binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
 
                 print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
+
+    def returnMessageType(self):
+        return (ENUMS.MSGTYPE.REQUEST if (int(self.msgResp, 2) == 0) else ENUMS.MSGTYPE.RESPONSE)
+
+    def returnCommand(self, debug = False):
+        cmd = self.msgCmd
+        cmdStr = ""
+
+        if cmd is ENUMS.COMMAND.SYSTEM_BEFEHL:
+            cmdStr = "System Command"
+        elif cmd is ENUMS.COMMAND.LOK_DIR:
+            cmdStr = "Locomotive Direction"
+        elif cmd is ENUMS.COMMAND.LOK_FCT:
+            cmdStr = "Locomotive Function"
+        elif cmd is ENUMS.COMMAND.LOK_VELOCITY:
+            cmdStr = "Locomotive Speed/Velocity"
+        elif cmd is ENUMS.COMMAND.LOK_DISCOVERY:
+            cmdStr = "Locomotive Discovery"
+        elif cmd is ENUMS.COMMAND.CTRL_ACCESSORY:
+            cmdStr = "Control Accessory"
+        else:
+            cmdStr = "not implemented in code"
+
+        if debug: print(cmdStr)
+        return cmd
