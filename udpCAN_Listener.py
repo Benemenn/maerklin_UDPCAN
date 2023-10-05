@@ -2,7 +2,7 @@ import socket
 import binascii
 
 # Define the UDP server's IP address and port
-UDP_IP = "192.168.0.79" #this is your computers IP adress !
+UDP_IP = "192.168.0.84" #this is your computers IP adress !
 UDP_PORT = 15730
 
 class UDPCANListener:
@@ -54,6 +54,8 @@ class UDPCANListener:
 
         canFrame.printData()
 
+#        del canFrame #usually not necessary, garbage collector will handle memory
+
 
 class CANFRAME:
     def __init__(self, data_bytes_list):
@@ -78,27 +80,28 @@ class CANIDENTIFIER:
         self.msgCmd     = ""
         self.msgResp    = ""
         self.msgHash    = ""
+        self.debug = False
 
-    def explainIdentifier(self, self.identifier_list):
+    def explainIdentifier(self):
 
-        completeIdentifierHEX = canIdentifier[0] + canIdentifier[1] + canIdentifier[2] + canIdentifier[3]
+        completeIdentifierHEX = self.identifier_list[0] + self.identifier_list[1] + self.identifier_list[2] + self.identifier_list[3]
         # print(f'Complete CAN IDENTIFIER in HEX: {completeIdentifierHEX}')
 
         completeIdentifierBINARY = format(int(completeIdentifierHEX, 16), '032b')
         print(f"Complete CAN IDENTIFIER in BINARY: {completeIdentifierBINARY}")
 
-        msgPrio1 = completeIdentifierBINARY[3:5]
-        msgPrio2 = completeIdentifierBINARY[5:7]
-        msgCmd = completeIdentifierBINARY[7:15]
-        msgResp = completeIdentifierBINARY[15:16]
-        msgHash = completeIdentifierBINARY[16:22] + completeIdentifierBINARY[25:]
+        self.msgPrio1 = completeIdentifierBINARY[3:5]
+        self.msgPrio2 = completeIdentifierBINARY[5:7]
+        self.msgCmd = completeIdentifierBINARY[7:15]
+        self.msgResp = completeIdentifierBINARY[15:16]
+        self.msgHash = completeIdentifierBINARY[16:22] + completeIdentifierBINARY[25:]
 
         # print(f"In BINARY: Prio1: {msgPrio1}, Prio2: {msgPrio2}, Cmd: {msgCmd}, Resp: {msgResp}, Hash: {msgHash}")
         print(
-            f"In HEX: Prio1: {hex(int(msgPrio1, 2))}, Prio2: {hex(int(msgPrio2, 2))}, Cmd: {hex(int(msgCmd, 2))}, Resp: {hex(int(msgResp, 2))}, Hash: {hex(int(msgHash, 2))}")
+            f"In HEX: Prio1: {hex(int(self.msgPrio1, 2))}, Prio2: {hex(int(self.msgPrio2, 2))}, Cmd: {hex(int(self.msgCmd, 2))}, Resp: {hex(int(self.msgResp, 2))}, Hash: {hex(int(self.msgHash, 2))}")
 
         if self.debug:
-            for hex_string in canIdentifier:
+            for hex_string in self.identifier_list:
                 binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
 
                 print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
