@@ -1,0 +1,17 @@
+
+# PyCharm
+.idea/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+
+
+
+
