@@ -7,23 +7,26 @@ UDP_PORT = 15730
 
 class UDPCANListener:
     def __init__(self, UDP_IP, UDP_PORT, debug = False):
-        self.UDP_IP     = UDP_IP
-        self.UDP_PORT   = UDP_PORT
-        self.debug      = debug
-        self.initUDPConnection()
-        self.data = b''
-        self.addr = ''
-        self.readable_data = ""
-        self.data_bytes_list = []
+        #create variables and assign them
+        self.UDP_IP             = UDP_IP
+        self.UDP_PORT           = UDP_PORT
+        self.debug              = debug
+        self.data               = b''
+        self.addr               = ''
+        self.readable_data      = ""
+        self.data_bytes_list    = []
 
-    def initUDPConnection(self):
         # Create a UDP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        # Bind the socket to the specified IP address and port
-        self.sock.bind((UDP_IP, UDP_PORT))
+        #initialize the UDP Socket
+        self.initUDPConnection()
 
-        print(f"Listening on {UDP_IP}:{UDP_PORT}...")
+    def initUDPConnection(self):
+        # Bind the socket to the specified IP address and port
+        self.sock.bind((self.UDP_IP, self.UDP_PORT))
+
+        print(f"Listening on {self.UDP_IP}:{self.UDP_PORT}...")
 
     def receiveFromUDP(self):
         # Receive data from the socket
@@ -79,8 +82,6 @@ class UDPCANListener:
                 binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
 
                 print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
-
-
 
 
 
