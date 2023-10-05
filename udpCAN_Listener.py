@@ -5,72 +5,94 @@ import binascii
 UDP_IP = "192.168.0.79" #this is your computers IP adress !
 UDP_PORT = 15730
 
-debug = False
+class UDPCANListener:
+    def __init__(self, UDP_IP, UDP_PORT, debug = False):
+        self.UDP_IP     = UDP_IP
+        self.UDP_PORT   = UDP_PORT
+        self.debug      = debug
+        self.initUDPConnection()
+        self.data = b''
+        self.addr = ''
+        self.readable_data = ""
+        self.data_bytes_list = []
 
-# Create a UDP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    def initUDPConnection(self):
+        # Create a UDP socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# Bind the socket to the specified IP address and port
-sock.bind((UDP_IP, UDP_PORT))
+        # Bind the socket to the specified IP address and port
+        self.sock.bind((UDP_IP, UDP_PORT))
 
-print(f"Listening on {UDP_IP}:{UDP_PORT}...")
+        print(f"Listening on {UDP_IP}:{UDP_PORT}...")
 
-def displayReadableData(data_bytes_list, readable_data, addr):
-    CANMSGIdentifier = list(data_bytes_list)[:4]
-    CANMSGDlc = list(data_bytes_list)[4:5]
-    CANMSGData = list(data_bytes_list)[5:14]
+    def receiveFromUDP(self):
+        # Receive data from the socket
+        self.data, self.addr = self.sock.recvfrom(1024)
+        self.readable_data = ' '.join(f'{byte:02X}' for byte in self.data)  # make bytes format more readable
 
-    # Print the received data in byte form
-    if debug: print(f"Received readable data: {readable_data}")
-    print(f"Received data (Raw Bytes): Identifier: {CANMSGIdentifier} Data length: {CANMSGDlc} Data: {CANMSGData}  from {addr}")
+        self.data_bytes_list = ['{:02X}'.format(byte) for byte in self.data]
 
-    explainIdentifier(CANMSGIdentifier)
+        self.displayReadableData(self.data_bytes_list, self.readable_data, self.addr)
 
-    print("Data: ", end="")
-    for databyte in CANMSGData:
-        print(f"{hex(int(databyte, 16))} ", end="")
-    print("\n")
-def explainIdentifier(canIdentifier):
+    def closeSocket(self):
+        # Close the socket when Ctrl+C is pressed
+        print("Closing the UDP socket...")
+        self.sock.close()
 
-    completeIdentifierHEX = canIdentifier[0] + canIdentifier[1] + canIdentifier[2] + canIdentifier[3]
-    #print(f'Complete CAN IDENTIFIER in HEX: {completeIdentifierHEX}')
+    def displayReadableData(self, data_bytes_list, readable_data, addr):
+        CANMSGIdentifier = list(data_bytes_list)[:4]
+        CANMSGDlc = list(data_bytes_list)[4:5]
+        CANMSGData = list(data_bytes_list)[5:14]
 
-    completeIdentifierBINARY = format(int(completeIdentifierHEX,16), '032b')
-    print(f"Complete CAN IDENTIFIER in BIT: {completeIdentifierBINARY}")
+        # Print the received data in byte form
+        if self.debug: print(f"Received readable data: {readable_data}")
+        print(
+            f"Received data (Raw Bytes): Identifier: {CANMSGIdentifier} Data length: {CANMSGDlc} Data: {CANMSGData}  from {addr}")
 
-    msgPrio1    = completeIdentifierBINARY[3:5]
-    msgPrio2    = completeIdentifierBINARY[5:7]
-    msgCmd      = completeIdentifierBINARY[7:15]
-    msgResp     = completeIdentifierBINARY[15:16]
-    msgHash     = completeIdentifierBINARY[16:22] + completeIdentifierBINARY[25:]
+        self.explainIdentifier(CANMSGIdentifier)
 
-    #print(f"In BINARY: Prio1: {msgPrio1}, Prio2: {msgPrio2}, Cmd: {msgCmd}, Resp: {msgResp}, Hash: {msgHash}")
-    print(f"In HEX: Prio1: {hex(int(msgPrio1, 2))}, Prio2: {hex(int(msgPrio2, 2))}, Cmd: {hex(int(msgCmd, 2))}, Resp: {hex(int(msgResp, 2))}, Hash: {hex(int(msgHash, 2))}")
+        print("Data: ", end="")
+        for databyte in CANMSGData:
+            print(f"{hex(int(databyte, 16))} ", end="")
+        print("\n")
 
-    if debug:
-        for hex_string in canIdentifier:
-            binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
+    def explainIdentifier(self, canIdentifier):
 
-            print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
+        completeIdentifierHEX = canIdentifier[0] + canIdentifier[1] + canIdentifier[2] + canIdentifier[3]
+        # print(f'Complete CAN IDENTIFIER in HEX: {completeIdentifierHEX}')
+
+        completeIdentifierBINARY = format(int(completeIdentifierHEX, 16), '032b')
+        print(f"Complete CAN IDENTIFIER in BINARY: {completeIdentifierBINARY}")
+
+        msgPrio1 = completeIdentifierBINARY[3:5]
+        msgPrio2 = completeIdentifierBINARY[5:7]
+        msgCmd = completeIdentifierBINARY[7:15]
+        msgResp = completeIdentifierBINARY[15:16]
+        msgHash = completeIdentifierBINARY[16:22] + completeIdentifierBINARY[25:]
+
+        # print(f"In BINARY: Prio1: {msgPrio1}, Prio2: {msgPrio2}, Cmd: {msgCmd}, Resp: {msgResp}, Hash: {msgHash}")
+        print(
+            f"In HEX: Prio1: {hex(int(msgPrio1, 2))}, Prio2: {hex(int(msgPrio2, 2))}, Cmd: {hex(int(msgCmd, 2))}, Resp: {hex(int(msgResp, 2))}, Hash: {hex(int(msgHash, 2))}")
+
+        if self.debug:
+            for hex_string in canIdentifier:
+                binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
+
+                print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
+
+
+
 
 
 def main():
+    udpCanListener = UDPCANListener(UDP_IP, UDP_PORT)
+
     while True:
         try:
-            # Receive data from the socket
-            data, addr = sock.recvfrom(1024)
-            readable_data = ' '.join(f'{byte:02X}' for byte in data) #make bytes format more readable
-
-            data_bytes_list = ['{:02X}'.format(byte) for byte in data]
-
-
-            displayReadableData(data_bytes_list, readable_data, addr)
-
+            udpCanListener.receiveFromUDP()
 
         except KeyboardInterrupt:
-            # Close the socket when Ctrl+C is pressed
-            print("Closing the UDP socket...")
-            sock.close()
+            udpCanListener.closeSocket()
             break
 
 if __name__ == "__main__":
