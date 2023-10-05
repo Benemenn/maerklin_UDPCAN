@@ -1,10 +1,6 @@
 import socket
 import binascii
 
-# Define the UDP server's IP address and port
-UDP_IP = "192.168.0.84" #this is your computers IP adress !
-UDP_PORT = 15730
-
 class UDPCANListener:
     def __init__(self, UDP_IP, UDP_PORT, debug = False):
         #create variables and assign them
@@ -105,19 +101,3 @@ class CANIDENTIFIER:
                 binary_string = bin(int.from_bytes(binascii.unhexlify(hex_string), byteorder='big'))
 
                 print(f'Hexadecimal: {hex_string}, Binary: {binary_string}')
-
-def main():
-    udpCanListener = UDPCANListener(UDP_IP, UDP_PORT)
-
-    while True:
-        try:
-            udpCanListener.receiveFromUDP()
-
-        except KeyboardInterrupt:
-            udpCanListener.closeSocket()
-            break
-
-if __name__ == "__main__":
-    main()
-
-
