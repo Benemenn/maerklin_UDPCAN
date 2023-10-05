@@ -1,0 +1,35 @@
+from enum import Enum
+
+class MSGTYPE(Enum):
+    REQUEST = 0
+    RESPONSE = 1
+
+class COMMAND(Enum):
+    SYSTEM_BEFEHL = 0x00
+    LOK_DISCOVERY = 0x01
+    LOK_VELOCITY = 0x04
+    LOK_DIR = 0x05
+    LOK_FCT = 0x06
+    READ_CFG = 0x07
+    WRITE_CFG = 0x08
+    CTRL_ACCESSORY = 0x0B
+
+class SUBCMD(Enum):
+    SYSTEM_STOP = 0x00
+    SYSTEM_GO = 0x01
+    SYSTEM_HALT = 0x02
+    LOK_EHALT = 0x03
+    LOK_CYCLE_STOP = 0x04
+    LOK_DATA_PROTOCOL = 0x05
+    SWITCH_TIME_ACCESSORY = 0x06
+    SYSTEM_OVERLOAD = 0x0A
+    SYSTEM_STATUS = 0x0B
+    SYSTEM_IDENTIFICATION = 0x0C
+    MFX_SEEK = 0x30
+    SYSTEM_RESET = 0x80
+
+class PROTOCOLS(Enum):
+    MM12 = 0
+    MFX = 1
+    SX2 = 2
+    DCC = 3
